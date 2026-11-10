@@ -1216,5 +1216,78 @@ difficulty, unlike time):
 
 This follows from our theoretical analysis and our time analysis of the changes made by Mr. Fox. There is nothing very shocking here.
 
+# Maintainability
+
+I feel a little at fault if this isn't maintainable. Particularly, I attempted to improve the code on what I thought would make it more maintainable initially, so let's see if this file keeps consistent and doesn't have very many strange choices/bad design
+
+## Unsigned Int and Consistency
+
+In C and C++, all types have a known size in bytes. However, this size does not stay consistent between architectures. As spoken here:
+
+```
+The C++ standard does not specify the size of integral types in bytes, but it specifies a minimum width in bits (see [basic.types.fundamental] p1). You can infer minimum size in bytes from that and the value of the CHAR_BIT macro that defines the number of bits in a byte. In all but the most obscure platforms it's 8, and it can't be less than 8.
+```
+Therefore, we bind ourself to a platform-dependent amount of bits. At first glance, this isn't so bad. After all, unsinged int have a minimum range of 0 to 65535, which log^2 of is approximately 16 bits, or 2^16 possibilities. However, in our code, while this only goes up to 9, if we wanted to modify this to work for NxN boards, we would quickly run into issues. Therefore, it may be appropriate to used an explicit bit type, like uint32_t. 
+
+If you're not convinced by that, consider the converse. If we explicitly **know** that we have a 9x9, a certain platform (for example, Linux and Mac OS both) will make our integers 4 bytes long, which is extra space we leave unusued. Therefore, using a uint16_t ensures congruency across all platforms.
+
+## Magic Numbers
+
+If I saw this in a codebase, I would be concerned. There's no comments to explain what this code does, just to explain what it is.
+
+```cpp
+    // [A5-Claude] all nine digits as one bitmask: bit d stands for digit d, so bits 1..9 are on and bit 0 is
+    // unused (0x3FE when SIZE is 9). Sets of candidate digits are stored as masks like this one
+    static const unsigned int ALL_DIGITS = (1u << (SIZE + 1)) - 2;
+``` 
+
+So what's going on?
+
+First, we will calculate our SIZE + 1, which would be 9 + 1 = 10. Then we bitshift the unsigned bit 1 10 times.
+
+```python3
+>>> 1 << 10
+1024
+>>> bin(1 << 10)
+'0b10000000000'
+```
+
+Now, we subtract 2. This strangely will give us this:
+0b1111111110
+
+This shows us two odd things. One, despite the fact our range is 1-9, we store a 0 bit. Secondly, by subtracting two, we get exactly all bits set to 1 in the 1 << 1 to 1 << 9 range.
+
+This helps us later, when we do our boolean operations. However, this is a very undocumented part of the code, and is defintely not good practice for maintainability to leave that way.
+
+## Comment Clarification
+
+This isn't necessarily my fault, or Mr. Fox's, but the comments are a mess. We have conflicting styles on me, Mr. Fox, and Claude's schema. 
+
+Claude uses a specific format on it's modifications. If it's Assignment 4 code, then it says A4+A5 and for Assignment 5 just purely A5. This is clarified at the top, even if doing A4+A5 is a little strange. I would just write A4?
+
+Regardless, the rest of the comments do not reflect this consistency. This causes weird gaps between my strange comments and Claude's precise robotic comments. Therefore, I feel like it would be a cool idea to resolve this conflict so that the formatting stays the same.
+
+# Implementing Single File Change
+
+We will be implementing the ability for all the solutions to be written to one file. This requires very little to no change in the code, and does not effect time and space complexity. The only change is that we just use one stream to write our solutions.
+
+## LLMs Chosen
+
+I chose Claude Opus 5.5 through Claude Code, but I only gave it Mr. Fox's code as context. I was able to use Claude Code by installing Claude Code through brew (although other package managers exist for other platforms that are not Mac OS). Then, after installing it, I ran it with claude and then prompted the upcoming prompt.
+
+Likewise, I chose Microsoft CoPilot, mostly because I don't like Microsoft and want a good reason to shame them. You can access Microsoft CoPilot by clicking on the start menu of a Windows 11 Machine, or frankly in any Windows app maintained by Microsoft: Word, Edge, Microsoft Paint, Notepad for some reason. Then, I gave it Mr. Fox's file and prompted it.
+
+## Prompt
+
+Here's the prompt used:
+
+```
+Please make it so all output, instead of being written as solution1.txt to solution5.txt, is instead written in one file called solutions.txt.
+
+The C++ file is titled fox.cpp
+
+```
+
+The contents of Mr Fox's file, which I showed at the beginning, are attached to each of these prompts.
 
 
