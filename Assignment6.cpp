@@ -4,11 +4,13 @@
 	 "
 human.cpp - by google gemini flash
 modified slightly by lucas frias
- Program:       EECS 348 Assignment 5 - Sudoku solver (Assignment5.cpp, revised from human.cpp)
+ Program:       EECS 348 Assignment 6 - Sudoku solver (Assignment6.cpp, revised from fox.cpp/human.cpp)
  Description:  Solves Sudoku problems by depth-first search with backtracking and finds EVERY solution.
                Each solution is printed to the console and also saved to one shared file, solutions.txt.
                Assignment 5 revision: digits are tracked in bitmasks, the empty cell with the fewest
                legal digits is filled first, and contradictory givens are detected while loading.
+               Assignment 6 revision: every puzzle's output now goes into that one shared solutions.txt
+               instead of a separate solutionN.txt per puzzle.
  Input:         puzzle1.txt ... puzzle5.txt (9 rows of 9 cells, '_' = empty cell, 1-9 = given digit)
  Output:        Console report for every puzzle, plus solutions.txt. For each puzzle the file holds the line
                "Puzzle: x" (x = puzzle file name), then either all solution grids (same layout as the puzzle
@@ -23,12 +25,10 @@ modified slightly by lucas frias
                (no tag)     Assignment 4 code kept as received (Gemini Flash / Lucas Frias), or a
                             personal comment Lucas Frias added while reviewing
  * Author:        Lucas Frias (by using Gemini Flash)
- * Created:       October 13th 2026 
- * Revised:        2026-11-11, implemented fix features 
- *                category to enum class Category, per Opus 5.5 pairing
+ * Created:       October 13th 2026
  * Revised by:    Jacob Fox, 2026-10-26 (Assignment 5: solution files, faster search, input checks)
-* Revised by: 	  Lucas Frias, 2026-11-11
- * Build:         g++ Assignment6.cpp -std=c++11 -Wall -Wextra -o Assignment5.exe
+ * Revised by:    Lucas Frias, 2026-11-11 (Assignment 6: single shared solutions.txt)
+ * Build:         g++ Assignment6.cpp -std=c++11 -Wall -Wextra -o Assignment6.exe
  * Run:           ./Assignment6.exe (puzzle1.txt through puzzle5.txt must be in the same folder)
 */
 #include <iostream>
